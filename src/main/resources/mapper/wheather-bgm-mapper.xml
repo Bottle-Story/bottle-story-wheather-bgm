@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kyj.fmk.mapper.WheatherBgmMapper">
+
+    <!-- 날씨 M 테이블 INSERT -->
+    <insert id="insertWthrM" parameterType="ReqInsertWthrDTO">
+        /*  날씨 M 테이블 INSERT */
+        INSERT INTO WTHR_M
+        (
+        USR_SEQ_ID
+        , WTHR_DATE
+        , WTHR_TIME
+        , WTHR_BASE_DATE
+        , WTHR_BASE_TIME
+        , T1H
+        , SKY
+        , PTY
+        , LGT
+        , WSD
+        , SKY_NM
+        , PTY_NM
+        , LGT_NM
+        , WSD_NM
+        , REG_SEQ_ID
+        , UPD_SEQ_ID
+        )
+        VALUES
+        (
+        #{usrSeqId}
+        , #{wthrDate}
+        , #{wthrTime}
+        , #{wthrBaseDate}
+        , #{wthrBaseTime}
+        , #{t1h}
+        , #{sky}
+        , #{pty}
+        , #{lgt}
+        , #{wsd}
+        , #{skyNm}
+        , #{ptyNm}
+        , #{lgtNm}
+        , #{wsdNm}
+        , #{usrSeqId}
+        , #{usrSeqId}
+        )
+    </insert>
+
+    <!-- 날씨 UI_D 테이블 INSERT -->
+    <insert id="insertWthrUiD" parameterType="ReqInsertWthrDTO">
+        /* -- 날씨 UI_D 테이블 INSERT -- */
+        INSERT INTO WTHR_UI_D
+        (
+        USR_SEQ_ID
+        , WTHR_DATE
+        , WTHR_TIME
+        , WTHR_BASE_DATE
+        , WTHR_BASE_TIME
+        , SUN_SET_TIME
+        , SUN_RISE_TIME
+        , OCEAN_CODE
+        , SKY_CODE
+        , PARTICLE_CODE
+        , REG_SEQ_ID
+        , UPD_SEQ_ID
+        )
+        VALUES
+        (
+        #{usrSeqId}
+        , #{wthrDate}
+        , #{wthrTime}
+        , #{wthrBaseDate}
+        , #{wthrBaseTime}
+        , #{sunSetTime}
+        , #{sunRiseTime}
+        , #{oceanCode}
+        , #{skyCode}
+        , #{particleCode}
+        , #{usrSeqId}
+        , #{usrSeqId}
+        )
+    </insert>
+
+
+
+    <select id="selectWthrViewDiff" parameterType="java.util.List" resultType="ReqInsertWthrDTO">
+        WITH WTHR_VIEW AS (
+        <foreach collection="list" item="wv" separator="UNION ALL">
+            SELECT
+                    #{wv.usrSeqId}      AS USR_SEQ_ID,
+                    #{wv.wthrDate}      AS WTHR_DATE,
+                    #{wv.wthrTime}      AS WTHR_TIME,
+                    #{wv.wthrBaseDate}  AS WTHR_BASE_DATE,
+                    #{wv.wthrBaseTime}  AS WTHR_BASE_TIME,
+                    #{wv.t1h}           AS T1H,
+                    #{wv.sky}           AS SKY,
+                    #{wv.pty}           AS PTY,
+                    #{wv.lgt}           AS LGT,
+                    #{wv.wsd}           AS WSD,
+                    #{wv.skyNm}         AS SKY_NM,
+                    #{wv.ptyNm}         AS PTY_NM,
+                    #{wv.lgtNm}         AS LGT_NM,
+                    #{wv.wsdNm}         AS WSD_NM,
+                    #{wv.sunSetTime}    AS SUN_SET_TIME,
+                    #{wv.sunRiseTime}   AS SUN_RISE_TIME,
+                    #{wv.oceanCode}     AS OCEAN_CODE,
+                    #{wv.skyCode}       AS SKY_CODE,
+                    #{wv.particleCode}  AS PARTICLE_CODE
+        </foreach>
+        )
+        SELECT
+                WV.USR_SEQ_ID,
+                WV.WTHR_DATE,
+                WV.WTHR_TIME,
+                WV.WTHR_BASE_DATE,
+                WV.WTHR_BASE_TIME,
+                WV.T1H,
+                WV.SKY,
+                WV.PTY,
+                WV.LGT,
+                WV.WSD,
+                WV.SKY_NM,
+                WV.PTY_NM,
+                WV.LGT_NM,
+                WV.WSD_NM,
+                WV.SUN_SET_TIME,
+                WV.SUN_RISE_TIME,
+                WV.OCEAN_CODE,
+                WV.SKY_CODE,
+                WV.PARTICLE_CODE
+          FROM WTHR_VIEW WV
+          WHERE  NOT EXISTS (
+                     SELECT 1
+                       FROM  WTHR_UI_D WUD
+                      WHERE    WUD.USR_SEQ_ID    = WV.USR_SEQ_ID
+                        AND    WUD.WTHR_DATE     = WV.WTHR_DATE
+                        AND    WUD.WTHR_TIME     = WV.WTHR_TIME
+                        AND    WUD.WTHR_BASE_DATE= WV.WTHR_BASE_DATE
+                        AND    WUD.WTHR_BASE_TIME= WV.WTHR_BASE_TIME
+                )
+        ORDER BY WV.WTHR_TIME;
+    </select>
+</mapper>
